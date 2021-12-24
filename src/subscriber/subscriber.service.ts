@@ -6,12 +6,11 @@ import { Repository } from 'typeorm';
 import { SubscriptionDTO } from './dto/subscriber.dto';
 import { Subscriber } from './subscriber.entity';
 
-
 @Injectable()
 export class SubscriberService {
   constructor(
     @InjectRepository(Subscriber) private subRepository: Repository<Subscriber>,
-    @Inject('WEB_PUSH') private webPush
+    @Inject('WEB_PUSH') private webPush,
   ) {}
 
   createSubscription(sub: SubscriptionDTO): Promise<Subscriber> {
@@ -24,13 +23,8 @@ export class SubscriberService {
     return this.subRepository.save(newSub);
   }
 
-  
-
-
-  
   @OnEvent('post.created')
   async handlePostCreatedEvent(event: PostCreatedEvent) {
-
     const subscribers: Subscriber[] = await this.subRepository.find();
 
     subscribers.forEach((sub) => {
@@ -39,18 +33,24 @@ export class SubscriberService {
         description: event.description,
       });
 
-      if(sub.authkey === ""){
-          console.log(`Subcriber ${sub.id} Should be deleted!`)
-      }else{
+      if (sub.authkey === '') {
+        console.log(`Subcriber ${sub.id} Should be deleted!`);
+        this.subRepository.remove(sub).then((res) => {
+          console.log("Deleted");
+          
+        },err => {
+          console.log(err);
+          
+        });
+      } else {
         this.webPush.sendNotification(
           {
             endpoint: sub.endpoint,
             keys: { auth: sub.authkey, p256dh: sub.p256dhkey },
           },
-          payload
+          payload,
         );
       }
-      
     });
   }
 }
