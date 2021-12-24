@@ -13,6 +13,11 @@ export class SubscriberService {
     @Inject('WEB_PUSH') private webPush,
   ) {}
 
+  /**
+   * CREATES SUBSCRIPTION
+   * SAVES TO DATABASE
+   *  
+   */
   createSubscription(sub: SubscriptionDTO): Promise<Subscriber> {
     const newSub = this.subRepository.create({
       endpoint: sub.endpoint,
@@ -23,26 +28,45 @@ export class SubscriberService {
     return this.subRepository.save(newSub);
   }
 
+  /**
+   * LISTENING TO post.created EVENT
+   * 
+   */
   @OnEvent('post.created')
   async handlePostCreatedEvent(event: PostCreatedEvent) {
+       /*
+    *GETS ALL SUBSCRIBERS
+    */
     const subscribers: Subscriber[] = await this.subRepository.find();
 
     subscribers.forEach((sub) => {
+      /*
+      *LOOPING THROUGH EACH SUBSCRIBER
+      */
       const payload = JSON.stringify({
         title: event.title,
         description: event.description,
       });
 
-      if (sub.authkey === '') {
+      if (sub.authkey === '' || sub.endpoint === '' || sub.p256dhkey === '') {
+        /*
+         *IF ANY FIELD IS NULL
+         */
+
         console.log(`Subcriber ${sub.id} Should be deleted!`);
-        this.subRepository.remove(sub).then((res) => {
-          console.log("Deleted");
-          
-        },err => {
-          console.log(err);
-          
-        });
+
+        this.subRepository
+          .remove(sub)
+          .then(
+            (res) => console.log('Deleted'),
+            (err) => console.log(err),
+          );
+
+
       } else {
+        /*
+         *SENDING PUSH NOTIFICATION
+         */
         this.webPush.sendNotification(
           {
             endpoint: sub.endpoint,

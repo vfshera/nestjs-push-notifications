@@ -4,7 +4,7 @@ const webPush  =  require('web-push')
 
 @Module({})
 export class PushNotificationsModule {
-  static  forRoot(sender: string, publicVapidKey: string,privateVapidKey: string): DynamicModule {
+  static  forRoot(sender: string, publicVapidKey: string, privateVapidKey: string): DynamicModule {
       
     webPush.setVapidDetails(
         sender,
