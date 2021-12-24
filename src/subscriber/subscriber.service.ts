@@ -10,7 +10,8 @@ import { Subscriber } from './subscriber.entity';
 export class SubscriberService {
   constructor(
     @InjectRepository(Subscriber) private subRepository: Repository<Subscriber>,
-    @Inject('WEB_PUSH') private webPush,
+    @Inject('WEB_PUSH') private webPush
+    
   ) {}
 
   /**
@@ -18,14 +19,23 @@ export class SubscriberService {
    * SAVES TO DATABASE
    *  
    */
-  createSubscription(sub: SubscriptionDTO): Promise<Subscriber> {
+  createSubscription(sub: SubscriptionDTO): string{
     const newSub = this.subRepository.create({
       endpoint: sub.endpoint,
       authkey: sub.keys.auth,
       p256dhkey: sub.keys.p256dh,
     });
+    
+    let subResponse = "Thanks for Subscribing!";
 
-    return this.subRepository.save(newSub);
+    this.subRepository.save(newSub).then((res) =>{
+      subResponse = "Thanks for Subscribing!";
+      
+    },(err) => {
+      subResponse = (err.errno == 1062) ? "You are already subscribed!" : "Failed to make your subscription!"; 
+    });
+
+    return subResponse;
   }
 
   /**
@@ -73,7 +83,14 @@ export class SubscriberService {
             keys: { auth: sub.authkey, p256dh: sub.p256dhkey },
           },
           payload,
-        );
+        ).then(res => {
+                  
+        }).catch(error => {
+          if(error.statusCode == 410){
+            console.log(error.body);
+            
+          }
+        });
       }
     });
   }

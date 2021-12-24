@@ -14,7 +14,7 @@ export class AppController {
   }
 
   @Post('/subscribe')
-  subscribe(@Body() body: SubscriptionDTO){
+  subscribe(@Body() body: SubscriptionDTO): string{
     return this.subService.createSubscription(body)
   }
 
