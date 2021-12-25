@@ -12,11 +12,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
-        // type: 'mysql',
-        type: 'postgres',
-        ssl:{
-          rejectUnauthorized: false
-        },
+        type: 'mysql',
         host: process.env.DB_HOST,
         port: parseInt(process.env.DB_PORT) || 3306,
         username: process.env.DB_USER,
