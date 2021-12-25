@@ -10,10 +10,10 @@ export class Subscriber{
     @Column({type: "varchar",length: 1000, unique: true})
     endpoint: string;
 
-    @Column({type: "longtext"})
+    @Column({type: "varchar", length: 1000})
     authkey: string;
 
-    @Column({type: "longtext"})
+    @Column({type: "varchar", length: 1000})
     p256dhkey: string;
 
     @CreateDateColumn()
